@@ -9,6 +9,8 @@
 
 Add spreadsheet-style **conditional formatting**, **colour pill badges**, **row/card highlights** and **inline progress bars** to Obsidian **Bases** (and optionally Markdown / Dataview tables).
 
+![Conditional formatting badges, highlights and progress bars in Obsidian Bases](docs/shot-1.png)
+
 ## Features
 
 - **5 visual styles**: Pill badge, Cell fill, Text colour, Row / Card highlight, and pure-CSS **Inline progress bar**
@@ -18,6 +20,10 @@ Add spreadsheet-style **conditional formatting**, **colour pill badges**, **row/
 - **One-click presets**: Ad CPA thresholds, Task status badges, Priority highlights, Overdue due dates, and 0–100% Progress bars
 - **Export / Import JSON**: share rule sets across vaults or teams
 - **Theme-aware & mobile-friendly**: uses Obsidian's semantic colour variables so badges look great in both light and dark themes
+
+## Visual rule builder
+
+![Visual rule builder with built-in presets and live preview](docs/shot-2.png)
 
 ## Commands
 
