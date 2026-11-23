@@ -1,9 +1,9 @@
 {
   "id": "bases-conditional-format",
   "name": "Bases Conditional Format",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minAppVersion": "1.9.0",
-  "description": "Add conditional formatting, colour badges, row highlights and inline progress bars to Obsidian Bases tables and cards.",
+  "description": "Add conditional formatting, colour badges, row highlights and inline progress bars to Bases tables and cards.",
   "author": "David",
   "authorUrl": "https://github.com/chi-li-peppers",
   "isDesktopOnly": false
