@@ -1,7 +1,7 @@
 {
   "id": "bases-conditional-format",
   "name": "Bases Conditional Format",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minAppVersion": "1.9.0",
   "description": "Add conditional formatting, colour badges, row highlights and inline progress bars to Bases tables and cards.",
   "author": "David",

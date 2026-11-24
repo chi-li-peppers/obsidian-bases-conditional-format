@@ -89,6 +89,16 @@ async function main() {
   const f3 = I.resolveFormatting(rules, "priority", "High", now);
   assert.ok(f3.rowClasses.includes("bcf-row-matched"));
   assert.strictEqual(f3.rowCssProps["--bcf-custom-color"], "#ff0055");
+
+  // Two rules matching same cell without stopOnMatch: later colour replaces earlier cleanly (no dual bcf-color-*)
+  const multiRules = [
+    I.makeRule({ column: "score", operator: "gt", value: "10", styleMode: "badge", color: "yellow" }),
+    I.makeRule({ column: "score", operator: "gt", value: "50", styleMode: "badge", color: "green", bold: true }),
+  ];
+  const fMulti = I.resolveFormatting(multiRules, "score", "80", now);
+  const colorClasses = fMulti.cellClasses.filter((c) => c.startsWith("bcf-color-"));
+  assert.deepStrictEqual(colorClasses, ["bcf-color-green"], "must keep only winning colour class");
+  assert.ok(fMulti.cellClasses.includes("bcf-bold"));
   console.log("formatting ok");
 
   // --- presets & import validation

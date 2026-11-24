@@ -32,13 +32,14 @@
   color: var(--bcf-custom-color) !important;
 }
 
-/* Pill badge mode */
+/* Pill badge mode — works for nested Bases wrappers, flat text cells and Markdown td */
 .bcf-mode-badge {
   position: relative;
 }
-.bcf-mode-badge > .bases-rendered-value,
-.bcf-mode-badge > .metadata-property-value,
-.bcf-mode-badge > .bases-table-cell,
+.bcf-mode-badge .bases-rendered-value,
+.bcf-mode-badge .metadata-property-value:not(:has(.bases-rendered-value)),
+.bcf-mode-badge .bases-table-cell:not(:has(.metadata-property-value, .bases-rendered-value)),
+.bases-td.bcf-mode-badge:not(:has(.bases-table-cell, .metadata-property-value, .bases-rendered-value)),
 .bcf-mode-badge.bcf-preview-pill,
 td.bcf-mode-badge {
   background-color: rgba(var(--bcf-rgb), 0.16);
@@ -52,9 +53,10 @@ td.bcf-mode-badge {
   width: fit-content;
   max-width: 100%;
 }
-.bcf-mode-badge.bcf-color-custom > .bases-rendered-value,
-.bcf-mode-badge.bcf-color-custom > .metadata-property-value,
-.bcf-mode-badge.bcf-color-custom > .bases-table-cell,
+.bcf-mode-badge.bcf-color-custom .bases-rendered-value,
+.bcf-mode-badge.bcf-color-custom .metadata-property-value:not(:has(.bases-rendered-value)),
+.bcf-mode-badge.bcf-color-custom .bases-table-cell:not(:has(.metadata-property-value, .bases-rendered-value)),
+.bases-td.bcf-mode-badge.bcf-color-custom:not(:has(.bases-table-cell, .metadata-property-value, .bases-rendered-value)),
 .bcf-mode-badge.bcf-color-custom.bcf-preview-pill,
 td.bcf-mode-badge.bcf-color-custom {
   background-color: color-mix(in srgb, var(--bcf-custom-color) 16%, transparent);

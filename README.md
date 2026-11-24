@@ -39,7 +39,14 @@ Bases Conditional Format makes **zero network requests**. All rules stay locally
 
 ## Install
 
-Install manually by copying `main.js`, `manifest.json` and `styles.css` from the [latest release](../../releases/latest) to `<vault>/.obsidian/plugins/bases-conditional-format/` and enabling the plugin.
+Search for **Bases Conditional Format** in **Settings → Community plugins**, or install manually by copying `main.js`, `manifest.json` and `styles.css` from the [latest release](../../releases/latest) to `<vault>/.obsidian/plugins/bases-conditional-format/` and enabling the plugin.
+
+## More Obsidian plugins & themes
+
+- **[Ad Recap](https://github.com/chi-li-peppers/obsidian-ad-recap)** — Google Ads & Meta Ads metrics in your notes
+- **[Traffic Recap](https://github.com/chi-li-peppers/obsidian-traffic-recap)** — GA4, Search Console, Plausible & PostHog metrics in your notes
+- **[UTM Vault](https://github.com/chi-li-peppers/obsidian-utm-vault)** — build, validate and audit UTM tracking links
+- **[Chili](https://github.com/chi-li-peppers/obsidian-chili)** & **[Popcorn](https://github.com/chi-li-peppers/obsidian-popcorn)** — Obsidian themes
 
 ## License
 

@@ -267,8 +267,10 @@ function computeBarPct(rawValue, min, max) {
  * Evaluate all rules against a (column, rawValue) pair and return computed cell/row styling instructions.
  */
 function resolveFormatting(rules, column, rawValue, nowDate) {
-  const cellClasses = new Set();
-  const rowClasses = new Set();
+  const cellFlags = new Set();
+  let cellMode = "";
+  let cellColor = "";
+  let rowColor = "";
   const cssProps = {};
   const rowCssProps = {};
   let icon = "";
@@ -278,39 +280,54 @@ function resolveFormatting(rules, column, rawValue, nowDate) {
     if (!matchesColumn(rule.column, column)) continue;
     if (!evaluateRule(rule, rawValue, nowDate)) continue;
 
-    const colorClass = `bcf-color-${COLORS.includes(rule.color) ? rule.color : "blue"}`;
+    const colorName = COLORS.includes(rule.color) ? rule.color : "blue";
+    const colorClass = `bcf-color-${colorName}`;
 
     if (rule.styleMode === "row") {
-      rowClasses.add("bcf-row-matched");
-      rowClasses.add(colorClass);
-      if (rule.color === "custom" && rule.customColor) {
+      rowColor = colorClass;
+      if (colorName === "custom" && rule.customColor) {
         rowCssProps["--bcf-custom-color"] = rule.customColor;
+      } else {
+        delete rowCssProps["--bcf-custom-color"];
       }
     } else {
-      cellClasses.add("bcf-matched");
-      cellClasses.add(`bcf-mode-${rule.styleMode}`);
-      cellClasses.add(colorClass);
-      if (rule.color === "custom" && rule.customColor) {
+      cellMode = `bcf-mode-${rule.styleMode}`;
+      cellColor = colorClass;
+      if (colorName === "custom" && rule.customColor) {
         cssProps["--bcf-custom-color"] = rule.customColor;
+      } else {
+        delete cssProps["--bcf-custom-color"];
       }
       if (rule.styleMode === "bar") {
         cssProps["--bcf-bar-pct"] = `${computeBarPct(rawValue, rule.barMin, rule.barMax)}%`;
+      } else {
+        delete cssProps["--bcf-bar-pct"];
       }
     }
 
     if (rule.icon) {
       icon = rule.icon;
-      cellClasses.add("bcf-has-icon");
+      cellFlags.add("bcf-has-icon");
     }
-    if (rule.bold) cellClasses.add("bcf-bold");
-    if (rule.strikethrough) cellClasses.add("bcf-strike");
+    if (rule.bold) cellFlags.add("bcf-bold");
+    if (rule.strikethrough) cellFlags.add("bcf-strike");
 
     if (rule.stopOnMatch) break;
   }
 
+  const cellClasses = [];
+  if (cellMode) {
+    cellClasses.push("bcf-matched", cellMode, cellColor);
+  } else if (cellFlags.size) {
+    cellClasses.push("bcf-matched");
+  }
+  for (const f of cellFlags) cellClasses.push(f);
+
+  const rowClasses = rowColor ? ["bcf-row-matched", rowColor] : [];
+
   return {
-    cellClasses: [...cellClasses],
-    rowClasses: [...rowClasses],
+    cellClasses,
+    rowClasses,
     cssProps,
     rowCssProps,
     icon,
@@ -331,16 +348,25 @@ function applyCssProps(el, props) {
   if (!el || !props) return;
   if (typeof el.setCssProps === "function") {
     el.setCssProps(props);
-  } else if (el.style) {
-    for (const [k, v] of Object.entries(props)) el.style.setProperty(k, v);
   }
 }
 
-function clearElementFormatting(el) {
+function clearSingleElement(el) {
   if (!el || !el.classList) return;
   for (const cls of ALL_BCF_CLASSES) el.classList.remove(cls);
   el.removeAttribute("data-bcf-icon");
   applyCssProps(el, { "--bcf-bar-pct": "", "--bcf-custom-color": "" });
+}
+
+function clearElementFormatting(el) {
+  if (!el) return;
+  clearSingleElement(el);
+  if (typeof el.querySelectorAll === "function") {
+    for (const inner of el.querySelectorAll(".bcf-has-icon")) {
+      inner.classList.remove("bcf-has-icon");
+      inner.removeAttribute("data-bcf-icon");
+    }
+  }
 }
 
 function readCellText(cellEl) {
@@ -352,6 +378,16 @@ function readCellText(cellEl) {
   return (cellEl.textContent || "").trim();
 }
 
+function findBadgeInnerTarget(cellEl) {
+  if (!cellEl || typeof cellEl.querySelector !== "function") return null;
+  return (
+    cellEl.querySelector(".bases-rendered-value") ||
+    cellEl.querySelector(".metadata-property-value") ||
+    cellEl.querySelector(".bases-table-cell") ||
+    null
+  );
+}
+
 function applyFormattingToCell(cellEl, rowEl, column, rules) {
   clearElementFormatting(cellEl);
   if (!rules.length) return;
@@ -359,11 +395,20 @@ function applyFormattingToCell(cellEl, rowEl, column, rules) {
   const fmt = resolveFormatting(rules, column, text);
 
   if (fmt.cellClasses.length) {
-    for (const c of fmt.cellClasses) cellEl.classList.add(c);
+    const isBadge = fmt.cellClasses.includes("bcf-mode-badge");
+    const iconTarget = isBadge ? findBadgeInnerTarget(cellEl) || cellEl : cellEl;
+    for (const c of fmt.cellClasses) {
+      if (c === "bcf-has-icon") continue;
+      cellEl.classList.add(c);
+    }
     applyCssProps(cellEl, fmt.cssProps);
-    if (fmt.icon) cellEl.setAttribute("data-bcf-icon", fmt.icon);
+    if (fmt.icon) {
+      iconTarget.classList.add("bcf-has-icon");
+      iconTarget.setAttribute("data-bcf-icon", fmt.icon);
+    }
   }
   if (rowEl && fmt.rowClasses.length) {
+    for (const color of COLORS) rowEl.classList.remove(`bcf-color-${color}`);
     for (const c of fmt.rowClasses) rowEl.classList.add(c);
     applyCssProps(rowEl, fmt.rowCssProps);
   }
@@ -417,6 +462,12 @@ class BasesConditionalFormatPlugin extends Plugin {
       this.scheduleScan();
       this.registerEvent(this.app.workspace.on("layout-change", () => this.scheduleScan()));
       this.registerEvent(this.app.workspace.on("active-leaf-change", () => this.scheduleScan()));
+      const onEdit = (evt) => {
+        const el = evt.target instanceof Element ? evt.target : null;
+        if (el && el.closest(".bases-view")) this.scheduleScan();
+      };
+      this.registerDomEvent(document, "input", onEdit, true);
+      this.registerDomEvent(document, "change", onEdit, true);
     });
   }
 
